@@ -7,17 +7,22 @@ export default function AdminAdd() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !file) return alert('Please enter title and select a video.');
     
     const videoUrl = URL.createObjectURL(file);
+    const thumbnailUrl = thumbnailFile 
+      ? URL.createObjectURL(thumbnailFile)
+      : 'https://images.unsplash.com/photo-1616469829581-73993eb86b02?auto=format&fit=crop&q=80&w=600';
+
     addVideo({
       id: Date.now().toString(),
       title,
       description,
-      thumbnailUrl: 'https://images.unsplash.com/photo-1616469829581-73993eb86b02?auto=format&fit=crop&q=80&w=600',
+      thumbnailUrl,
       videoUrl,
       views: '0',
       duration: 'New'
@@ -58,6 +63,33 @@ export default function AdminAdd() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
+        </div>
+
+        <div className="form-group" style={{ marginBottom: 0 }}>
+          <label className="form-label">Thumbnail Image (Optional)</label>
+          <div style={{ 
+            border: '2px dashed var(--border)', 
+            padding: '2rem', 
+            textAlign: 'center', 
+            borderRadius: 'var(--radius-lg)', 
+            backgroundColor: 'rgba(255,255,255,0.02)',
+            cursor: 'pointer',
+            transition: 'border-color 0.3s ease'
+          }}>
+            <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>
+              {thumbnailFile ? thumbnailFile.name : 'Select a custom thumbnail (JPG, PNG)'}
+            </p>
+            <input 
+              type="file" 
+              accept="image/*"
+              style={{ display: 'none' }}
+              id="thumbnail-upload"
+              onChange={(e) => {
+                if(e.target.files?.length) setThumbnailFile(e.target.files[0]);
+              }}
+            />
+            <label htmlFor="thumbnail-upload" className="btn btn-outline" style={{ display: 'inline-flex' }}>Browse Image</label>
+          </div>
         </div>
 
         <div className="form-group" style={{ marginBottom: 0 }}>

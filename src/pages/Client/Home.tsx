@@ -12,11 +12,11 @@ export default function Home() {
     <div className="container">
       <header className="navbar">
         <div className="nav-logo">
-          <span style={{ color: 'var(--accent)' }}>▶</span> BmadHub
+          <span style={{ color: 'var(--accent)' }}>▶</span> Highlight
         </div>
         <div>
-          <Link to="/admin/login" className="btn btn-outline" style={{ fontSize: '0.9rem' }}>
-            Admin Login
+          <Link to="/admin" className="btn btn-outline" style={{ fontSize: '0.9rem' }}>
+            Admin
           </Link>
         </div>
       </header>
@@ -28,27 +28,27 @@ export default function Home() {
         <div className="video-grid">
           {videos.map((video) => (
             <Link to={`/video/${video.id}`} key={video.id} className="video-card">
-              <div 
-                className="thumbnail-wrapper" 
-                style={{ 
-                  position: 'relative', 
-                  borderRadius: 'var(--radius-md)', 
-                  overflow: 'hidden', 
+              <div
+                className="thumbnail-wrapper"
+                style={{
+                  position: 'relative',
+                  borderRadius: 'var(--radius-md)',
+                  overflow: 'hidden',
                   aspectRatio: '16/9',
                   marginBottom: '1rem',
                   backgroundColor: 'var(--bg-secondary)'
                 }}
               >
-                <img 
-                  src={video.thumbnailUrl} 
-                  alt={video.title} 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }} 
+                <img
+                  src={video.thumbnailUrl}
+                  alt={video.title}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }}
                 />
                 <div style={{ position: 'absolute', bottom: '8px', right: '8px', backgroundColor: 'rgba(0,0,0,0.8)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 600 }}>
                   {video.duration}
                 </div>
               </div>
-              
+
               <h3 style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>{video.title}</h3>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                 {video.views} views • {video.description.substring(0, 40)}...
