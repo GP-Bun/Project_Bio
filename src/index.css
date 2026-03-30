@@ -46,6 +46,12 @@ h1, h2, h3, h4, h5, h6 {
   padding: 2rem;
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -129,6 +135,20 @@ h1, h2, h3, h4, h5, h6 {
   margin-top: 2rem;
 }
 
+@media (max-width: 1024px) {
+  .video-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .video-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
 /* Header Navbar */
 .navbar {
   display: flex;
@@ -139,6 +159,16 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 2rem;
 }
 
+@media (max-width: 768px) {
+  .navbar {
+    padding: 1rem 0;
+    gap: 1rem;
+  }
+  .nav-logo {
+    font-size: 1.2rem;
+  }
+}
+
 .nav-logo {
   font-size: 1.5rem;
   font-weight: 700;
@@ -146,4 +176,12 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  white-space: nowrap;
+}
+
+/* Extra responsiveness for cards and glass panels */
+@media (max-width: 480px) {
+  h1 { font-size: 1.8rem !important; }
+  .glass-panel { padding: 1.2rem; }
+  .btn { width: 100%; } /* Thả nút dài hết màn hình trên mobile */
 }

@@ -14,10 +14,25 @@ export default function AdminList() {
     fetchVideos();
   }, []);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, videoUrl: string, thumbUrl: string) => {
     if (confirm('Are you sure you want to delete this video?')) {
-      await supabase.from('videos').delete().eq('id', id);
-      fetchVideos();
+      try {
+        // Delete from Storage
+        if (videoUrl?.includes('videos/')) {
+          const videoName = videoUrl.split('/').pop();
+          if (videoName) await supabase.storage.from('videos').remove([videoName]);
+        }
+        if (thumbUrl && thumbUrl.includes('thumbnails/')) {
+          const thumbName = thumbUrl.split('/').pop();
+          if (thumbName) await supabase.storage.from('thumbnails').remove([thumbName]);
+        }
+
+        // Delete from DB
+        await supabase.from('videos').delete().eq('id', id);
+        fetchVideos();
+      } catch (error) {
+        console.error('Delete failed:', error);
+      }
     }
   };
 
@@ -30,17 +45,18 @@ export default function AdminList() {
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <Link to="/" className="btn btn-outline" style={{ fontSize: '0.9rem' }}>View Live Site</Link>
-          <Link to="/admin/add" className="btn" style={{ fontSize: '0.9rem' }}>+ Upload Video</Link>
+          <Link to="/admin/add" className="btn" style={{ fontSize: '0.9rem' }}>+ New Video</Link>
         </div>
       </header>
 
+      {/* Cột SIZE vẫn hiển thị trong bảng nhưng Thanh Đo tổng ở trên đã bị xóa */}
       <div className="glass-panel" style={{ padding: '0', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead style={{ borderBottom: '1px solid var(--border)', backgroundColor: 'var(--bg-secondary)' }}>
             <tr>
               <th style={{ padding: '1.2rem', color: 'var(--text-secondary)' }}>Video</th>
               <th style={{ padding: '1.2rem', color: 'var(--text-secondary)' }}>Views</th>
-              <th style={{ padding: '1.2rem', color: 'var(--text-secondary)' }}>Status</th>
+              <th style={{ padding: '1.2rem', color: 'var(--text-secondary)' }}>Size</th>
               <th style={{ padding: '1.2rem', color: 'var(--text-secondary)', textAlign: 'right' }}>Actions</th>
             </tr>
           </thead>
@@ -51,17 +67,17 @@ export default function AdminList() {
                   <img src={video.thumbnailurl || video.thumbnailUrl} alt={video.title} style={{ width: '80px', height: '45px', objectFit: 'cover', borderRadius: '4px' }} />
                   <div>
                     <h4 style={{ fontWeight: 500, marginBottom: '4px' }}>{video.title}</h4>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{video.duration}</span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{video.duration || 'New'}</span>
                   </div>
                 </td>
-                <td style={{ padding: '1.2rem' }}>{video.views}</td>
-                <td style={{ padding: '1.2rem' }}>
-                  <span style={{ padding: '4px 12px', background: 'rgba(34, 197, 94, 0.1)', color: '#4ade80', borderRadius: '20px', fontSize: '0.8rem' }}>Public</span>
+                <td style={{ padding: '1.2rem' }}>{video.views || 0}</td>
+                <td style={{ padding: '1.2rem', fontSize: '0.85rem' }}>
+                  {video.size ? `${(video.size / (1024 * 1024)).toFixed(1)} MB` : '-'}
                 </td>
                 <td style={{ padding: '1.2rem', textAlign: 'right' }}>
                   <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                    <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: '0.8rem' }}>Edit</button>
-                    <button onClick={() => handleDelete(video.id)} className="btn" style={{ padding: '6px 14px', fontSize: '0.8rem', backgroundColor: '#3f3f46', marginLeft: '8px' }}>Delete</button>
+                    <Link to={`/admin/edit/${video.id}`} className="btn btn-outline" style={{ padding: '6px 14px', fontSize: '0.8rem' }}>Edit</Link>
+                    <button onClick={() => handleDelete(video.id, video.videourl, video.thumbnailurl)} className="btn" style={{ padding: '6px 14px', fontSize: '0.8rem', backgroundColor: '#3f3f46', marginLeft: '4px' }}>Delete</button>
                   </div>
                 </td>
               </tr>

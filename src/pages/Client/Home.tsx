@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 export default function Home() {
   const [videos, setVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     async function fetchVideos() {
@@ -20,8 +21,29 @@ export default function Home() {
   return (
     <div className="container">
       <header className="navbar">
-        <div className="nav-logo">
-          <span style={{ color: 'var(--accent)' }}>▶</span> Highlight
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flex: 1, maxWidth: '600px', margin: '0 2rem' }}>
+          <div className="search-container" style={{ position: 'relative', width: '100%' }}>
+            <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }}>🔍</span>
+            <input 
+              type="text" 
+              placeholder="Tìm kiếm video..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                width: '100%',
+                backgroundColor: 'rgba(255,255,255,0.05)',
+                border: '1px solid var(--border)',
+                borderRadius: '50px',
+                padding: '0.6rem 1rem 0.6rem 2.5rem',
+                color: 'var(--text-primary)',
+                fontSize: '0.9rem',
+                outline: 'none',
+                transition: 'all 0.3s ease'
+              }}
+              onFocus={(e) => e.target.style.borderColor = 'var(--accent)'}
+              onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
+            />
+          </div>
         </div>
         <div>
           <Link to="/admin" className="btn btn-outline" style={{ fontSize: '0.9rem' }}>
@@ -32,10 +54,12 @@ export default function Home() {
 
       <main>
         <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Trang chủ</h1>
-        <p style={{ color: 'var(--text-secondary)' }}></p>
+        {/* <p style={{ color: 'var(--text-secondary)' }}></p> */}
 
         <div className="video-grid">
-          {videos.map((video) => (
+          {videos
+            .filter(video => video.title.toLowerCase().includes(searchQuery.toLowerCase()))
+            .map((video) => (
             <Link to={`/video/${video.id}`} key={video.id} className="video-card">
               <div
                 className="thumbnail-wrapper"
