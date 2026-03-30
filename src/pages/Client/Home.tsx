@@ -1,13 +1,22 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getVideos, type Video } from '../../data/videoStore';
+import { supabase } from '../../lib/supabase';
 
 export default function Home() {
-  const [videos, setVideos] = useState<Video[]>([]);
+  const [videos, setVideos] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setVideos(getVideos());
+    async function fetchVideos() {
+      const { data, error } = await supabase.from('videos').select('*').order('created_at', { ascending: false });
+      if (data) setVideos(data);
+      else console.error('Error fetching videos:', error);
+      setLoading(false);
+    }
+    fetchVideos();
   }, []);
+
+  if (loading) return <div className="container" style={{ textAlign: 'center', marginTop: '100px' }}>Loading videos...</div>;
   return (
     <div className="container">
       <header className="navbar">
@@ -22,8 +31,8 @@ export default function Home() {
       </header>
 
       <main>
-        <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Discover Videos</h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Explore carefully curated premium content.</p>
+        <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Trang chủ</h1>
+        <p style={{ color: 'var(--text-secondary)' }}></p>
 
         <div className="video-grid">
           {videos.map((video) => (
@@ -40,7 +49,7 @@ export default function Home() {
                 }}
               >
                 <img
-                  src={video.thumbnailUrl}
+                  src={video.thumbnailurl || video.thumbnailUrl}
                   alt={video.title}
                   style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' }}
                 />

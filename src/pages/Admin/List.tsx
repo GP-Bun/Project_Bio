@@ -1,18 +1,23 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getVideos, deleteVideo, type Video } from '../../data/videoStore';
+import { supabase } from '../../lib/supabase';
 
 export default function AdminList() {
-  const [videos, setVideos] = useState<Video[]>([]);
+  const [videos, setVideos] = useState<any[]>([]);
+
+  const fetchVideos = async () => {
+    const { data } = await supabase.from('videos').select('*').order('created_at', { ascending: false });
+    if (data) setVideos(data);
+  };
 
   useEffect(() => {
-    setVideos(getVideos());
+    fetchVideos();
   }, []);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this video?')) {
-      deleteVideo(id);
-      setVideos(getVideos());
+      await supabase.from('videos').delete().eq('id', id);
+      fetchVideos();
     }
   };
 
@@ -43,7 +48,7 @@ export default function AdminList() {
             {videos.map((video) => (
               <tr key={video.id} style={{ borderBottom: '1px solid var(--border)', transition: 'background-color 0.2s ease' }} className="admin-tr">
                 <td style={{ padding: '1.2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <img src={video.thumbnailUrl} alt={video.title} style={{ width: '80px', height: '45px', objectFit: 'cover', borderRadius: '4px' }} />
+                  <img src={video.thumbnailurl || video.thumbnailUrl} alt={video.title} style={{ width: '80px', height: '45px', objectFit: 'cover', borderRadius: '4px' }} />
                   <div>
                     <h4 style={{ fontWeight: 500, marginBottom: '4px' }}>{video.title}</h4>
                     <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{video.duration}</span>

@@ -1,11 +1,23 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getVideos } from '../../data/videoStore';
+import { useEffect, useState } from 'react';
+import { supabase } from '../../lib/supabase';
 
 export default function VideoPlayer() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const videos = getVideos();
-  const video = videos.find(v => v.id === id);
+  const [video, setVideo] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchVideo() {
+      const { data } = await supabase.from('videos').select('*').eq('id', id).single();
+      setVideo(data);
+      setLoading(false);
+    }
+    if (id) fetchVideo();
+  }, [id]);
+
+  if (loading) return <div className="container" style={{ textAlign: 'center', paddingTop: '100px' }}>Loading...</div>;
 
   if (!video) {
     return (
@@ -30,8 +42,8 @@ export default function VideoPlayer() {
       <main style={{ backgroundColor: '#000', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <div style={{ width: '100%', maxWidth: '1200px', margin: '0 auto', aspectRatio: '16/9' }}>
           <video 
-            src={video.videoUrl} 
-            poster={video.thumbnailUrl}
+            src={video.videourl || video.videoUrl} 
+            poster={video.thumbnailurl || video.thumbnailUrl}
             controls
             autoPlay
             style={{ width: '100%', height: '100%', outline: 'none', backgroundColor: '#000' }}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { addVideo } from '../../data/videoStore';
+import { supabase } from '../../lib/supabase';
 
 export default function AdminAdd() {
   const navigate = useNavigate();
@@ -8,28 +8,50 @@ export default function AdminAdd() {
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !file) return alert('Please enter title and select a video.');
     
-    const videoUrl = URL.createObjectURL(file);
-    const thumbnailUrl = thumbnailFile 
-      ? URL.createObjectURL(thumbnailFile)
-      : 'https://images.unsplash.com/photo-1616469829581-73993eb86b02?auto=format&fit=crop&q=80&w=600';
+    setUploading(true);
+    let videoUrlStr = '';
+    let thumbnailUrlStr = 'https://images.unsplash.com/photo-1616469829581-73993eb86b02?auto=format&fit=crop&q=80&w=600';
 
-    addVideo({
-      id: Date.now().toString(),
-      title,
-      description,
-      thumbnailUrl,
-      videoUrl,
-      views: '0',
-      duration: 'New'
-    });
+    try {
+      const videoExt = file.name.split('.').pop();
+      const videoPath = `${Date.now()}.${videoExt}`;
+      const { error: videoError } = await supabase.storage.from('videos').upload(videoPath, file);
+      if (videoError) throw videoError;
+      videoUrlStr = supabase.storage.from('videos').getPublicUrl(videoPath).data.publicUrl;
 
-    alert('Mock Upload Successful!');
-    navigate('/admin');
+      if (thumbnailFile) {
+        const thumbExt = thumbnailFile.name.split('.').pop();
+        const thumbPath = `${Date.now()}.${thumbExt}`;
+        const { error: thumbError } = await supabase.storage.from('thumbnails').upload(thumbPath, thumbnailFile);
+        if (thumbError) throw thumbError;
+        thumbnailUrlStr = supabase.storage.from('thumbnails').getPublicUrl(thumbPath).data.publicUrl;
+      }
+
+      const { error: dbError } = await supabase.from('videos').insert([{
+        title,
+        description,
+        thumbnailurl: thumbnailUrlStr,
+        videourl: videoUrlStr,
+        views: '0',
+        duration: 'New'
+      }]);
+
+      if (dbError) throw dbError;
+
+      alert('Upload Successful!');
+      navigate('/admin');
+    } catch (error: any) {
+      console.error(error);
+      alert('Upload failed: ' + error.message + '\n\nPlease ensure you have created two public buckets named "videos" and "thumbnails" in Supabase Storage.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -119,8 +141,8 @@ export default function AdminAdd() {
           </div>
         </div>
 
-        <button type="submit" className="btn" style={{ padding: '1rem', marginTop: '1rem', fontSize: '1.1rem' }}>
-          Start Upload
+        <button type="submit" disabled={uploading} className="btn" style={{ padding: '1rem', marginTop: '1rem', fontSize: '1.1rem', opacity: uploading ? 0.7 : 1 }}>
+          {uploading ? 'Uploading...' : 'Start Upload'}
         </button>
       </form>
     </div>
