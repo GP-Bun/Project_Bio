@@ -1,7 +1,21 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { mockVideos } from '../../data/mockVideos';
+import { getVideos, deleteVideo, type Video } from '../../data/videoStore';
 
 export default function AdminList() {
+  const [videos, setVideos] = useState<Video[]>([]);
+
+  useEffect(() => {
+    setVideos(getVideos());
+  }, []);
+
+  const handleDelete = (id: string) => {
+    if (confirm('Are you sure you want to delete this video?')) {
+      deleteVideo(id);
+      setVideos(getVideos());
+    }
+  };
+
   return (
     <div className="container" style={{ maxWidth: '1000px', margin: '40px auto' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
@@ -26,7 +40,7 @@ export default function AdminList() {
             </tr>
           </thead>
           <tbody>
-            {mockVideos.map((video) => (
+            {videos.map((video) => (
               <tr key={video.id} style={{ borderBottom: '1px solid var(--border)', transition: 'background-color 0.2s ease' }} className="admin-tr">
                 <td style={{ padding: '1.2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <img src={video.thumbnailUrl} alt={video.title} style={{ width: '80px', height: '45px', objectFit: 'cover', borderRadius: '4px' }} />
@@ -42,7 +56,7 @@ export default function AdminList() {
                 <td style={{ padding: '1.2rem', textAlign: 'right' }}>
                   <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                     <button className="btn btn-outline" style={{ padding: '6px 14px', fontSize: '0.8rem' }}>Edit</button>
-                    <button className="btn" style={{ padding: '6px 14px', fontSize: '0.8rem', backgroundColor: '#3f3f46', marginLeft: '8px' }}>Delete</button>
+                    <button onClick={() => handleDelete(video.id)} className="btn" style={{ padding: '6px 14px', fontSize: '0.8rem', backgroundColor: '#3f3f46', marginLeft: '8px' }}>Delete</button>
                   </div>
                 </td>
               </tr>

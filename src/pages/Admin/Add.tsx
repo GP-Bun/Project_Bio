@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { addVideo } from '../../data/videoStore';
 
 export default function AdminAdd() {
   const navigate = useNavigate();
@@ -10,6 +11,18 @@ export default function AdminAdd() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !file) return alert('Please enter title and select a video.');
+    
+    const videoUrl = URL.createObjectURL(file);
+    addVideo({
+      id: Date.now().toString(),
+      title,
+      description,
+      thumbnailUrl: 'https://images.unsplash.com/photo-1616469829581-73993eb86b02?auto=format&fit=crop&q=80&w=600',
+      videoUrl,
+      views: '0',
+      duration: 'New'
+    });
+
     alert('Mock Upload Successful!');
     navigate('/admin');
   };

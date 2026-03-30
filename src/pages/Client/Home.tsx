@@ -1,7 +1,13 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { mockVideos } from '../../data/mockVideos';
+import { getVideos, type Video } from '../../data/videoStore';
 
 export default function Home() {
+  const [videos, setVideos] = useState<Video[]>([]);
+
+  useEffect(() => {
+    setVideos(getVideos());
+  }, []);
   return (
     <div className="container">
       <header className="navbar">
@@ -20,7 +26,7 @@ export default function Home() {
         <p style={{ color: 'var(--text-secondary)' }}>Explore carefully curated premium content.</p>
 
         <div className="video-grid">
-          {mockVideos.map((video) => (
+          {videos.map((video) => (
             <Link to={`/video/${video.id}`} key={video.id} className="video-card">
               <div 
                 className="thumbnail-wrapper" 

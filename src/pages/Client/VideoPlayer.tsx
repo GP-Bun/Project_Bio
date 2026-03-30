@@ -1,10 +1,11 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { mockVideos } from '../../data/mockVideos';
+import { getVideos } from '../../data/videoStore';
 
 export default function VideoPlayer() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const video = mockVideos.find(v => v.id === id);
+  const videos = getVideos();
+  const video = videos.find(v => v.id === id);
 
   if (!video) {
     return (
